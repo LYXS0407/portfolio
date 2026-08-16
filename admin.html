@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>作品集管理后台 · 刘富强</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/admin.css?v=20260817e">
+</head>
+<body class="page-admin">
+
+  <!-- ==================== 侧边导航 ==================== -->
+  <aside class="adm-side">
+    <div class="adm-side-brand">
+      <img src="assets/logo.png" alt="LFQ 标志">
+      <span>作品集后台</span>
+    </div>
+    <nav class="adm-side-nav" id="tabs" aria-label="后台导航">
+      <button class="is-active" type="button" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>数据看板</span>
+      </button>
+      <button type="button" data-tab="works">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 15l-5-5-9 9"/></svg>
+        <span>作品图</span>
+      </button>
+      <button type="button" data-tab="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>项目案例</span>
+      </button>
+      <button type="button" data-tab="experiences">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
+        <span>经历</span>
+      </button>
+      <button type="button" data-tab="brands">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.9-5.4 2.9 1-6L3.3 9.4l6-.9z"/></svg>
+        <span>品牌</span>
+      </button>
+      <button type="button" data-tab="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="#0a0a0a"/><circle cx="15" cy="12" r="2" fill="#0a0a0a"/><circle cx="7" cy="17" r="2" fill="#0a0a0a"/></svg>
+        <span>站点设置</span>
+      </button>
+      <button type="button" data-tab="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 20v-6M11 20V8M17 20v-10"/><path d="M3 20h18"/></svg>
+        <span>访问分析</span>
+      </button>
+      <button type="button" data-tab="preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        <span>实时预览</span>
+      </button>
+    </nav>
+    <div class="adm-side-foot">
+      <a href="index.html" target="_blank" rel="noopener">返回网站 ↗</a>
+      <button type="button" id="logoutBtn" hidden>退出登录</button>
+    </div>
+  </aside>
+
+  <!-- ==================== 主操作区 ==================== -->
+  <main class="adm-main">
+
+    <!-- 登录 -->
+    <section id="loginView" class="adm-login" hidden>
+      <div class="adm-card">
+        <h2>登录后台</h2>
+        <p class="adm-hint">账号在 Supabase 控制台创建（Authentication → Users → Add user）。</p>
+        <form id="loginForm" class="adm-form" autocomplete="on">
+          <label>邮箱
+            <input type="email" id="loginEmail" autocomplete="username" required>
+          </label>
+          <label>密码
+            <input type="password" id="loginPassword" autocomplete="current-password" required>
+          </label>
+          <button class="adm-btn" type="submit">登 录</button>
+        </form>
+        <p class="adm-error" id="loginError" hidden></p>
+      </div>
+    </section>
+
+    <!-- 编辑器 -->
+    <section id="editorView" hidden>
+      <header class="adm-page-head">
+        <h1 id="pageTitle">数据看板</h1>
+      </header>
+
+      <!-- 数据看板（登录默认页） -->
+      <section class="adm-panel" id="panel-dashboard">
+        <div class="adm-panel-head">
+          <h2>访问概况 <small>近 7 天</small></h2>
+          <button class="adm-btn adm-btn-small adm-btn-ghost" type="button" data-goto="analytics">查看完整分析 →</button>
+        </div>
+        <div class="adm-stats" id="dashAnalyticsStats"></div>
+        <div class="adm-card-box an-wide" id="dashTrendBox">
+          <div class="adm-card-head">
+            <h3>访问趋势</h3>
+            <div class="an-legend">
+              <span class="lg-pv">PV</span>
+              <span class="lg-uv">独立访客</span>
+            </div>
+          </div>
+          <div id="dashAnalyticsTrend"></div>
+        </div>
+
+        <div class="adm-panel-head" style="margin-top:26px">
+          <h2>内容管理</h2>
+        </div>
+        <div class="adm-stats" id="statsCards"></div>
+        <div class="adm-dash-grid" style="margin-top:16px">
+          <div class="adm-card-box">
+            <h3>项目分类分布</h3>
+            <div id="chartCategory"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>项目年份分布</h3>
+            <div id="chartYear"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>作品图构成</h3>
+            <div id="chartWorks"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>快捷操作</h3>
+            <div class="adm-quick" id="quickActions"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 作品图（7 列瀑布流） -->
+      <section class="adm-panel" id="panel-works" hidden>
+        <div class="adm-panel-head">
+          <h2>作品图 <small>7 列瀑布流 · 拖拽排序 · 悬停卡片编辑</small></h2>
+          <button class="adm-btn" type="button" data-new="works">＋ 新增作品</button>
+        </div>
+        <div class="adm-masonry" id="list-works"></div>
+      </section>
+
+      <section class="adm-panel" id="panel-projects" hidden>
+        <div class="adm-panel-head">
+          <h2>项目案例 <small>首页案例 + 项目列表 + 详情页 · 拖拽排序</small></h2>
+          <button class="adm-btn" type="button" data-new="projects">＋ 新增项目</button>
+        </div>
+        <div class="adm-list" id="list-projects"></div>
+      </section>
+
+      <section class="adm-panel" id="panel-experiences" hidden>
+        <div class="adm-panel-head">
+          <h2>过往经历 <small>拖拽排序</small></h2>
+          <button class="adm-btn" type="button" data-new="experiences">＋ 新增经历</button>
+        </div>
+        <div class="adm-list" id="list-experiences"></div>
+      </section>
+
+      <section class="adm-panel" id="panel-brands" hidden>
+        <div class="adm-panel-head">
+          <h2>服务品牌 LOGO <small>拖拽排序</small></h2>
+          <button class="adm-btn" type="button" data-new="brands">＋ 新增品牌</button>
+        </div>
+        <div class="adm-list brand-grid" id="list-brands"></div>
+      </section>
+
+      <section class="adm-panel" id="panel-settings" hidden>
+        <div class="adm-panel-head">
+          <h2>站点设置 <small>简介 / 形象照 / 首页视频 / 联系方式 / 附件</small></h2>
+        </div>
+        <div class="adm-form-wrap" id="form-settings"></div>
+      </section>
+
+      <section class="adm-panel" id="panel-analytics" hidden>
+        <div class="adm-panel-head">
+          <h2>访问分析 <small>来自公开网站的匿名浏览数据</small></h2>
+          <div class="adm-range" id="anRange">
+            <button class="is-active" type="button" data-range="7d">近 7 天</button>
+            <button type="button" data-range="30d">近 30 天</button>
+            <button type="button" data-range="today">今天</button>
+            <button type="button" data-range="all">全部</button>
+          </div>
+        </div>
+        <div class="adm-stats" id="anStats"></div>
+        <div class="adm-dash-grid">
+          <div class="adm-card-box an-wide">
+            <div class="adm-card-head">
+              <h3>访问趋势</h3>
+              <div class="an-legend">
+                <span class="lg-pv">PV</span>
+                <span class="lg-uv">独立访客</span>
+              </div>
+            </div>
+            <div id="anTrend"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>访客来源</h3>
+            <div id="anSources"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>页面访问 Top</h3>
+            <div id="anPages"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>设备占比</h3>
+            <div id="anDevices"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>热门作品点击 Top</h3>
+            <div id="anWorks"></div>
+          </div>
+          <div class="adm-card-box">
+            <h3>转化行为</h3>
+            <div id="anConv"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="adm-panel" id="panel-preview" hidden>
+        <div class="adm-panel-head">
+          <h2>实时预览 <small>展示的是公开网站的当前效果</small></h2>
+          <button class="adm-btn" type="button" id="previewRefresh">↻ 刷新预览</button>
+        </div>
+        <div class="adm-preview">
+          <iframe id="previewFrame" src="index.html" title="网站预览"></iframe>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- ==================== 右侧编辑抽屉 ==================== -->
+  <aside class="adm-drawer" id="formDrawer" aria-hidden="true">
+    <div class="adm-drawer-head">
+      <h3 id="drawerTitle">编辑</h3>
+      <button type="button" id="drawerClose" aria-label="关闭">×</button>
+    </div>
+    <div class="adm-drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div class="adm-toast" id="toast" hidden></div>
+
+  <script src="js/vendor/supabase.min.js?v=20260817e"></script>
+  <script src="js/site-data-provider.js?v=20260817e"></script>
+  <script src="js/admin.js?v=20260817e"></script>
+</body>
+</html>

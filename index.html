@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>刘富强 · 品牌视觉与UI设计师 · 作品集</title>
+  <meta name="description" content="刘富强 FUQIANG LIU — 品牌视觉设计师 / UI 设计师，六年品牌与UI设计实战经验。">
+  <meta property="og:title" content="刘富强 · 品牌视觉与UI设计师 · 作品集">
+  <meta property="og:description" content="品牌 · UI · 大屏 · 物料 — 六年设计实战经验，期待与你聊聊下一个好项目。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/covers/01.jpg">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=20260817m">
+</head>
+<body>
+
+  <div class="cursor-glass" id="cursorGlass" aria-hidden="true"></div>
+
+  <!-- ==================== 作品区 → 个人介绍 过渡动画 ==================== -->
+  <div class="works-transition" id="worksTransition" aria-hidden="true">
+    <div class="wt-block" id="wtBlock"></div>
+    <h2 class="wt-text" id="wtText">
+      <span>品牌视觉与</span>
+      <span>UI设计师</span>
+    </h2>
+  </div>
+
+  <!-- ==================== 顶部导航：左符号 · 中胶囊毛玻璃导航 · 右下载作品集 ==================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="#home" aria-label="返回首页">
+        <img src="assets/logo.png" alt="刘富强 LFQ">
+      </a>
+
+      <nav class="nav-capsule" id="navCapsule" aria-label="主导航">
+        <ul class="gooey-nav">
+          <li class="active"><a class="nav-link is-active" href="#home" data-nav="home">首页</a></li>
+          <li><a class="nav-link" href="#works" data-nav="works">作品</a></li>
+          <li><a class="nav-link" href="#about" data-nav="about">关于</a></li>
+          <li><a class="nav-link" href="#experience" data-nav="experience">经历</a></li>
+          <li><a class="nav-link" href="#cases" data-nav="cases">案例</a></li>
+          <li><a class="nav-link" href="#brands" data-nav="brands">客户</a></li>
+          <li><a class="nav-link" href="#contact" data-nav="contact">联系</a></li>
+        </ul>
+        <span class="effect filter" id="navEffectFilter" aria-hidden="true"></span>
+      </nav>
+
+      <a class="btn-download" href="assets/downloads/刘富强-品牌视觉设计师-作品集.pdf" download>下载作品集</a>
+      <button class="nav-burger" id="navBurger" type="button" aria-label="菜单" aria-expanded="false">
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== 移动端全屏菜单 ==================== -->
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav class="mobile-menu-nav">
+      <a href="index.html#home"><span class="menu-cn">首页</span><span class="menu-en">HOME</span></a>
+      <a href="works.html"><span class="menu-cn">作品</span><span class="menu-en">WORKS</span></a>
+      <a href="index.html#about"><span class="menu-cn">关于</span><span class="menu-en">ABOUT</span></a>
+      <a href="index.html#experience"><span class="menu-cn">经历</span><span class="menu-en">EXPERIENCE</span></a>
+      <a href="index.html#cases"><span class="menu-cn">案例</span><span class="menu-en">CASES</span></a>
+      <a href="index.html#brands"><span class="menu-cn">客户</span><span class="menu-en">CLIENTS</span></a>
+      <a href="index.html#contact"><span class="menu-cn">联系</span><span class="menu-en">CONTACT</span></a>
+    </nav>
+  </div>
+
+  <main>
+
+    <!-- ==================== 01 · 首页 ==================== -->
+    <section class="hero" id="home">
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/home-video-poster.jpg" aria-hidden="true">
+        <source src="assets/home-video.mp4" type="video/mp4">
+      </video>
+      <div class="hero-inner">
+        <h1 class="hero-title" aria-label="DESIGN PORTFOLIO">
+          <span class="hero-line" data-split>DESIGN</span>
+          <span class="hero-line" data-split data-split-delay="150">PORTFOLIO</span>
+        </h1>
+        <p class="hero-cn" data-split data-split-delay="250">设计作品集</p>
+
+        <p class="hero-en-right" data-reveal="up" data-delay="3">
+          We specialize in creating brand solutions in the technology sector. We can handle the design of various
+          operational materials across multiple channels, including posters, visual designs for the official account,
+          event display designs, and exhibition boards. We are familiar with various production processes and ensure
+          the efficient implementation and launch of the solutions.
+        </p>
+
+        <p class="hero-en-left" data-reveal="up" data-delay="4">
+          With six years of practical experience in brand and UI design, proficient in using mainstream design
+          software such as PS, AI, Figma, and Blender; skilled in integrating AIGC tools to build standardized and
+          efficient workflows, capable of independently managing complete brand and UI design projects, and
+          simultaneously optimizing creative presentation and delivery efficiency.
+        </p>
+
+        <ul class="hero-tags">
+          <li>品牌</li>
+          <li>UI</li>
+          <li>3D</li>
+          <li>AI</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==================== 02 · 作品展示（滚动时从右进入、向左滑出） ==================== -->
+    <section class="works" id="works">
+      <div class="works-pin">
+        <ul class="works-title" id="worksTitle" aria-hidden="true">
+          <li>品牌</li>
+          <li>UI</li>
+          <li>3D</li>
+          <li>AI</li>
+        </ul>
+        <a class="cases-more works-more" href="works.html">更多作品 <span class="more-arrow"><img src="assets/contacts/arrow.svg" alt=""></span></a>
+        <div class="works-viewport">
+          <div class="works-track" id="worksTrack">
+            <!-- 卡片由 JS 依据 site-data 渲染 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 03 · 个人简介 ==================== -->
+    <section class="about" id="about">
+      <div class="container about-grid">
+        <div class="about-copy">
+          <h2 class="about-title" id="aboutTitle" aria-hidden="true" data-reveal="up">
+            品牌视觉与<br>UI设计师
+          </h2>
+          <p class="about-desc" data-reveal="up"></p>
+          <p class="about-desc" data-reveal="up" data-delay="1"></p>
+          <a class="btn-text" data-reveal="up" data-delay="2" href="assets/downloads/刘富强-品牌设计师-简历.pdf" download>
+            下载简历 <img class="btn-arrow" src="assets/contacts/arrow.svg" alt="">
+          </a>
+        </div>
+        <div class="about-photo-wrap" data-reveal="right">
+          <div class="about-photo" id="aboutPhoto">
+            <img src="assets/portrait.jpg" alt="刘富强个人形象照" decoding="async">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 04 · 过往经历（默认展示 01，hover 展开对应详情） ==================== -->
+    <section class="experience" id="experience">
+      <div class="container">
+        <div class="sec-head">
+          <p class="sec-en" data-split>EXPERIENCE</p>
+          <h2 class="sec-title" data-split data-split-delay="250">过往经历</h2>
+        </div>
+      </div>
+      <!-- 经历卡片整页拉通 -->
+      <div class="exp-list" id="expList">
+        <!-- 经历条目由 JS 依据 site-data 渲染 -->
+      </div>
+    </section>
+
+    <!-- ==================== 05 · 案例展示（滚动时从右侧进入，点击进入项目详情） ==================== -->
+    <section class="cases" id="cases">
+      <div class="container">
+        <div class="sec-head cases-head">
+          <div>
+            <p class="sec-en" data-split>CASE PRESENTATION</p>
+            <h2 class="sec-title" data-split data-split-delay="250">案例展示</h2>
+          </div>
+          <a class="cases-more" data-reveal="up" data-delay="1" href="projects.html">查看更多 <span class="more-arrow"><img src="assets/contacts/arrow.svg" alt=""></span></a>
+        </div>
+        <div class="case-grid" id="caseGrid">
+          <!-- 案例卡片由 JS 依据 site-data 渲染 -->
+        </div>
+        <a class="cases-more cases-more-mobile" data-reveal="up" href="projects.html">查看更多 <span class="more-arrow"><img src="assets/contacts/arrow.svg" alt=""></span></a>
+      </div>
+    </section>
+
+    <!-- ==================== 06 · 服务品牌（hover 时 logo 周围出现淡淡描边） ==================== -->
+    <section class="brands" id="brands">
+      <div class="container">
+        <div class="sec-head">
+          <p class="sec-en" data-split>SERVICE BRAND</p>
+          <h2 class="sec-title" data-split data-split-delay="250">服务品牌</h2>
+        </div>
+        <div class="brand-marquee" id="brandGrid" data-reveal="up">
+          <!-- LOGO 由 JS 依据 site-data 渲染 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 07 · 联系我 ==================== -->
+    <section class="contact" id="contact">
+      <div class="container contact-inner">
+        <div class="contact-head">
+          <h2 class="contact-big" data-split>LET'S TALK</h2>
+          <p class="contact-cn" data-split data-split-delay="250">联系我</p>
+          <p class="contact-desc" data-reveal="up">能承接各类海报、公众号视觉、活动美陈、展会展板、UI页面、网页展示</p>
+        </div>
+
+        <div class="contact-cards" id="contactCards">
+          <!-- 联系方式由 JS 依据 site-data 渲染 -->
+        </div>
+
+        <div class="contact-downloads" data-reveal="up">
+          <a href="assets/downloads/刘富强-品牌设计师-简历.pdf" download>下载简历 <img src="assets/contacts/arrow.svg" alt=""></a>
+          <a href="assets/downloads/刘富强-品牌视觉设计师-作品集.pdf" download>下载作品 <img src="assets/contacts/arrow.svg" alt=""></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部弥散动画背景（上下镜像，置于联系我/页脚背景） -->
+  <div class="aurora-bottom" id="auroraBg" aria-hidden="true"></div>
+
+  <footer class="footer">
+    <p>@ 鹿云先生 FUQIANG LIU · 品牌视觉设计师 · UI设计师</p>
+  </footer>
+
+  <script src="js/site-data.js?v=20260817e"></script>
+  <script src="js/vendor/supabase.min.js?v=20260817e" async></script>
+  <script src="js/site-data-provider.js?v=20260817f"></script>
+  <script src="js/analytics.js?v=20260817e"></script>
+  <script src="js/main.js?v=20260817m"></script>
+  <script src="js/liquid-glass.js?v=20260817f"></script>
+</body>
+</html>

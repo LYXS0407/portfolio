@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品展示 · 刘富强作品集</title>
+  <meta name="description" content="刘富强设计作品展示——品牌、UI、3D、物料等作品图集。">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=20260817m">
+</head>
+<body class="page-works">
+
+  <!-- ==================== 顶部导航 ==================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="index.html#home" aria-label="返回首页">
+        <img src="assets/logo.png" alt="刘富强 LFQ">
+      </a>
+
+      <nav class="nav-capsule" id="navCapsule" aria-label="主导航">
+        <ul class="gooey-nav">
+          <li><a class="nav-link" href="index.html#home" data-nav="home">首页</a></li>
+          <li class="active"><a class="nav-link" href="index.html#works" data-nav="works">作品</a></li>
+          <li><a class="nav-link" href="index.html#about" data-nav="about">关于</a></li>
+          <li><a class="nav-link" href="index.html#experience" data-nav="experience">经历</a></li>
+          <li><a class="nav-link" href="index.html#cases" data-nav="cases">案例</a></li>
+          <li><a class="nav-link" href="index.html#brands" data-nav="brands">客户</a></li>
+          <li><a class="nav-link" href="index.html#contact" data-nav="contact">联系</a></li>
+        </ul>
+        <span class="effect filter" id="navEffectFilter" aria-hidden="true"></span>
+      </nav>
+
+      <a class="btn-download" href="assets/downloads/刘富强-品牌视觉设计师-作品集.pdf" download>下载作品集</a>
+      <button class="nav-burger" id="navBurger" type="button" aria-label="菜单" aria-expanded="false">
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== 移动端全屏菜单 ==================== -->
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav class="mobile-menu-nav">
+      <a href="index.html#home"><span class="menu-cn">首页</span><span class="menu-en">HOME</span></a>
+      <a href="works.html"><span class="menu-cn">作品</span><span class="menu-en">WORKS</span></a>
+      <a href="index.html#about"><span class="menu-cn">关于</span><span class="menu-en">ABOUT</span></a>
+      <a href="index.html#experience"><span class="menu-cn">经历</span><span class="menu-en">EXPERIENCE</span></a>
+      <a href="index.html#cases"><span class="menu-cn">案例</span><span class="menu-en">CASES</span></a>
+      <a href="index.html#brands"><span class="menu-cn">客户</span><span class="menu-en">CLIENTS</span></a>
+      <a href="index.html#contact"><span class="menu-cn">联系</span><span class="menu-en">CONTACT</span></a>
+    </nav>
+  </div>
+
+  <main>
+    <!-- 瀑布页头 -->
+    <section class="subpage-hero">
+      <div class="container">
+        <div class="gallery-head">
+          <div class="gallery-head-title" id="navBack" role="button" tabindex="0" aria-label="返回上一页" title="返回上一页">
+            <div>
+              <p class="sec-en" data-split>WORKS</p>
+              <div class="gallery-title-row">
+                <img class="gallery-back-icon" src="assets/contacts/arrow.svg" alt="">
+                <h1 class="gallery-title" data-split data-split-delay="250">作品展示</h1>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 瀑布流：纯图片展示 -->
+    <section class="gallery">
+      <div class="container">
+        <div class="waterfall" id="worksWaterfall">
+          <!-- 作品图片由 JS 依据 site-data 渲染，后续可接入后台 -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部弥散动画背景 -->
+  <div class="aurora-bottom" id="auroraBg" aria-hidden="true"></div>
+
+  <footer class="footer">
+    <p>@ 鹿云先生 FUQIANG LIU · 品牌视觉设计师 · UI设计师</p>
+  </footer>
+
+  <!-- ==================== 作品放大查看（灯箱） ==================== -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-backdrop"></div>
+    <button class="lightbox-btn lightbox-close" id="lightboxClose" type="button" aria-label="关闭">×</button>
+    <button class="lightbox-btn lightbox-prev" id="lightboxPrev" type="button" aria-label="上一张">‹</button>
+    <figure class="lightbox-figure">
+      <img id="lightboxImg" src="" alt="" draggable="false">
+    </figure>
+    <button class="lightbox-btn lightbox-next" id="lightboxNext" type="button" aria-label="下一张">›</button>
+    <div class="lightbox-zoom">
+      <button class="lightbox-btn lightbox-zoom-in" id="lightboxZoomIn" type="button" aria-label="放大">+</button>
+      <button class="lightbox-btn lightbox-zoom-out" id="lightboxZoomOut" type="button" aria-label="缩小">−</button>
+    </div>
+    <span class="lightbox-counter" id="lightboxCounter"></span>
+  </div>
+
+  <script src="js/site-data.js?v=20260817e"></script>
+  <script src="js/vendor/supabase.min.js?v=20260817e" async></script>
+  <script src="js/site-data-provider.js?v=20260817f"></script>
+  <script src="js/analytics.js?v=20260817e"></script>
+  <script src="js/works-page.js?v=20260817i"></script>
+  <script src="js/main.js?v=20260817m"></script>
+</body>
+</html>
