@@ -1863,12 +1863,13 @@
   function initOverscrollGuard() {
     if (!isMobile()) return;
     var startY = 0;
+    var doc = document.scrollingElement || document.documentElement;
     document.addEventListener("touchstart", function (e) {
       if (e.touches.length === 1) startY = e.touches[0].clientY;
     }, { passive: true });
     document.addEventListener("touchmove", function (e) {
       if (e.touches.length !== 1 || !e.cancelable) return;
-      if (window.scrollY <= 0 && e.touches[0].clientY - startY > 0) {
+      if (doc.scrollTop <= 0 && e.touches[0].clientY - startY > 0) {
         e.preventDefault(); // 顶部下拉手势：阻止浏览器刷新
       }
     }, { passive: false });
