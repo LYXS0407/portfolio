@@ -32,7 +32,8 @@
   // supabase.min.js 可能被异步加载，等待它就绪后再发起云端请求，
   // 避免首个请求恰好发生在库加载完成前而白白丢失云端数据
   function waitForClient(deadline) {
-    deadline = deadline || Date.now() + 1200;
+    // 首次进入时 supabase.min.js 可能还在异步加载，给足就绪时间（2s）
+    deadline = deadline || Date.now() + 2000;
     return new Promise(function (resolve) {
       function check() {
         var c = getClient();
@@ -177,7 +178,7 @@
       dataPromise = waitForClient()
         .then(function (c) {
           if (!c) return null; // 库未就绪/不可用 → 调用方使用本地 site-data.js
-          return Promise.race([loadRemote(), timeout(1200)]);
+          return Promise.race([loadRemote(), timeout(3500)]);
         })
         .catch(function () {
           return null; // 云端不可用 → 调用方使用本地 site-data.js
