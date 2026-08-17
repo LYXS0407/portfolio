@@ -2882,7 +2882,7 @@ body.menu-open {
   }
 
   .exp-desc-inner p {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 10px;
@@ -2891,7 +2891,7 @@ body.menu-open {
   }
 
   .about-desc {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.65;
     text-align: justify;
     text-justify: inter-ideograph;
@@ -2939,7 +2939,7 @@ body.menu-open {
   }
 
   .contact-card .cc-value {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
     margin-top: -4px;
     white-space: nowrap;
@@ -2992,7 +2992,7 @@ body.menu-open {
   }
 
   .footer p {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .footer {
@@ -3024,7 +3024,7 @@ body.menu-open {
 
   .project-desc {
     margin-top: 16px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.75;
   }
 
@@ -3044,7 +3044,7 @@ body.menu-open {
   }
 
   .pn-label {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .pn-title {
@@ -3052,7 +3052,7 @@ body.menu-open {
   }
 
   .back-home {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 

@@ -74,11 +74,12 @@
     fill();
   }
 
-  // 启动：先用本地数据立即渲染，云端数据到达后再刷新（不阻塞）
-  boot(data);
+  // 启动：等云端数据渲染一次（loading 态保持）；云端不可用则回退本地数据
   if (window.loadSiteData) {
     window.loadSiteData().then(function (d) {
-      if (d) boot(d);
+      boot(d || window.SITE_DATA);
     });
+  } else {
+    boot(data);
   }
 })();
