@@ -1608,6 +1608,11 @@ body.is-wt-active .nav-capsule.is-expanded {
   background: var(--card);
 }
 
+/* 全部项目页加载占位：跨满整行，避免挤在某一列 */
+.page-projects .wf-loading {
+  column-span: all;
+}
+
 /* 作品展示瀑布页：纯图片瓦片 */
 .work-tile {
   display: block;

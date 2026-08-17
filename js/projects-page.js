@@ -59,11 +59,13 @@
     renderGrid();
   }
 
-  // 启动：先用本地数据立即渲染，云端数据到达后再刷新（不阻塞）
-  boot(data);
+  // 启动：等云端数据渲染一次（与作品页/首页一致）；云端不可用则回退本地
   if (window.loadSiteData) {
+    waterfall.innerHTML = '<p class="wf-loading">项目加载中…</p>';
     window.loadSiteData().then(function (d) {
-      if (d) boot(d);
+      boot(d || window.SITE_DATA);
     });
+  } else {
+    boot(data);
   }
 })();
