@@ -1783,7 +1783,6 @@
     initStatic();
     ensureHeroAutoplay();
     bindHeroAutoplayRetry();
-    initOverscrollGuard();
     // 通知液态玻璃等渲染完成后可克隆页面
     window.__siteRendered = true;
     try {
@@ -1856,23 +1855,7 @@
       }
     }
     document.addEventListener("touchstart", retry, { once: true, passive: true });
-    document.addEventListener("scroll", retry, { once: true, passive: true });
-  }
-
-  /* ---------- 移动端：顶部下拉时拦截 iOS 下拉刷新，避免页面回顶/重载 ---------- */
-  function initOverscrollGuard() {
-    if (!isMobile()) return;
-    var startY = 0;
-    var doc = document.scrollingElement || document.documentElement;
-    document.addEventListener("touchstart", function (e) {
-      if (e.touches.length === 1) startY = e.touches[0].clientY;
-    }, { passive: true });
-    document.addEventListener("touchmove", function (e) {
-      if (e.touches.length !== 1 || !e.cancelable) return;
-      if (doc.scrollTop <= 0 && e.touches[0].clientY - startY > 0) {
-        e.preventDefault(); // 顶部下拉手势：阻止浏览器刷新
-      }
-    }, { passive: false });
+    document.addEventListener("scroll", retry, { once: true, passive: true, capture: true });
   }
 
   /* ---------- 启动：先尝试云端数据，失败则用本地数据 ---------- */

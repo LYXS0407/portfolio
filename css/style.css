@@ -1871,16 +1871,31 @@ body.is-wt-active .nav-capsule.is-expanded {
 }
 
 @media (max-width: 1100px) {
-  html {
-    /* 用 clip 而非 hidden：裁剪横向溢出但不在 iOS 上创建滚动容器，
-       避免 Safari 在纵向滚动时把页面弹回顶部 */
-    overflow-x: clip;
-    overscroll-behavior-y: none;
+  /* 移动端：文档本身不再滚动，内容在 .mobile-scroll 内部滚动，
+     iOS 的「下拉刷新」在浏览器层面就不会再触发 */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .mobile-scroll {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+  }
+
+  /* 菜单/灯箱打开时锁住内部滚动 */
+  body.menu-open .mobile-scroll,
+  body.lb-open .mobile-scroll {
+    overflow: hidden;
   }
 
   body {
     min-width: 0;
-    overscroll-behavior-y: none;
   }
 
   .header-inner {

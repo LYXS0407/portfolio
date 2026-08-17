@@ -104,7 +104,7 @@
         }
       });
     }, { threshold: 0.2 });
-    document.querySelectorAll("body > main section[id]").forEach(function (s) {
+    document.querySelectorAll(".mobile-scroll main section[id], body > main section[id]").forEach(function (s) {
       io.observe(s);
     });
   }
@@ -117,9 +117,11 @@
     tick = true;
     requestAnimationFrame(function () {
       tick = false;
-      var max = document.documentElement.scrollHeight - window.innerHeight;
+      // 移动端内容在 .mobile-scroll 内部滚动，桌面端用文档滚动
+      var scroller = document.querySelector(".mobile-scroll") || document.scrollingElement || document.documentElement;
+      var max = scroller.scrollHeight - window.innerHeight;
       if (max <= 0) return;
-      var p = Math.round((window.scrollY / max) * 100);
+      var p = Math.round((scroller.scrollTop / max) * 100);
       Object.keys(depths).forEach(function (d) {
         if (!depths[d] && p >= +d) {
           depths[d] = true;
@@ -127,7 +129,7 @@
         }
       });
     });
-  }, { passive: true });
+  }, { passive: true, capture: true });
 
   /* ---------- 点击行为 ---------- */
   document.addEventListener("click", function (e) {
