@@ -1866,6 +1866,10 @@ body.is-wt-active .nav-capsule.is-expanded {
 }
 
 @media (max-width: 1100px) {
+  html {
+    overflow-x: hidden; /* 移动端禁止页面横向滚动/拖动 */
+  }
+
   body {
     min-width: 0;
   }
@@ -2932,6 +2936,11 @@ body.menu-open {
   .contact-card .cc-arrow img {
     width: 16px;
     height: 13px;
+  }
+
+  /* 移动端隐藏联系卡片外扩的 Hover 光晕层，避免超出屏幕撑出横向滚动 */
+  .contact-card > .edge-light {
+    display: none;
   }
 
   .contact-card:last-child {
