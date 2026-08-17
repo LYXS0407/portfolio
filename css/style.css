@@ -2305,7 +2305,8 @@ body.menu-open {
     transform: translateY(-5px) rotate(-45deg);
   }
 
-  /* 子页面（全部项目 / 项目详情）：logo 区换成返回上一页按钮 */
+  /* 子页面（作品展示 / 全部项目 / 项目详情）：logo 区换成返回上一页按钮 */
+  .page-works .brand,
   .page-projects .brand,
   .page-project .brand {
     display: none;

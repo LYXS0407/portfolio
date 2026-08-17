@@ -9,16 +9,16 @@
   var data = window.SITE_DATA;
   var waterfall = document.getElementById("worksWaterfall");
 
-  /* 电脑端：点「作品展示」标题区域返回上一页（无历史则回首页） */
+  /* 返回上一页：电脑端点标题区域 / 移动端点左上角返回箭头（无历史则回首页） */
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "index.html";
+    }
+  }
   var backBtn = document.getElementById("navBack");
   if (backBtn && window.innerWidth >= 1100) {
-    function goBack() {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "index.html";
-      }
-    }
     backBtn.addEventListener("click", goBack);
     backBtn.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") {
@@ -26,6 +26,10 @@
         goBack();
       }
     });
+  }
+  var backHeader = document.getElementById("navBackHeader");
+  if (backHeader && window.innerWidth < 1100) {
+    backHeader.addEventListener("click", goBack);
   }
 
   if (!data || !waterfall) return;
