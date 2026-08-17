@@ -1868,6 +1868,10 @@ body.is-wt-active .nav-capsule.is-expanded {
     font-size: 52px;
   }
 
+  .hero-cn {
+    font-size: 52px; /* 与英文同步缩小，避免平板端英文字号不一致 */
+  }
+
   .about-grid {
     grid-template-columns: minmax(0, 1fr) 400px;
     gap: 60px;
@@ -2484,6 +2488,7 @@ body.menu-open {
   .hero-title {
     width: 100%;
     font-size: 44px;
+    font-weight: 600; /* 移动端英文字重与中文一致，避免细体 */
     text-align: left;
   }
 
