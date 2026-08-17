@@ -1791,19 +1791,6 @@
     } catch (e) { /* 忽略 */ }
   }
 
-  /* ---------- 云端数据到达：增量刷新内容（不重新播放首屏动画） ---------- */
-  function applyRemoteData(d) {
-    if (!d) return;
-    useData(d);
-    applyHeroVideo();
-    applySiteSettings();
-    renderContent();
-    initReveal(); // 重绘后的新节点重新挂入场观察器
-    try {
-      document.dispatchEvent(new CustomEvent("site:content-updated"));
-    } catch (e) { /* 忽略 */ }
-  }
-
   /* ---------- 首页视频：云端设置里有则替换本地视频 ---------- */
   function applyHeroVideo() {
     var hv = data && data.heroVideo;
@@ -1861,10 +1848,17 @@
 
   /* ---------- 启动：先尝试云端数据，失败则用本地数据 ---------- */
   function boot() {
-    // 先用本地数据立即渲染 + 播放入场动画，不等网络；
-    // 云端数据到达后再做增量刷新（内容一致时用户无感知）
-    init();
-    if (window.loadSiteData) window.loadSiteData().then(applyRemoteData);
+    // 与作品页/项目页一致：等云端数据渲染一次，避免本地渲染后再刷新
+    if (window.loadSiteData) {
+      window.loadSiteData().then(function (d) {
+        if (d) useData(d);
+        applyHeroVideo();
+        applySiteSettings();
+        init();
+      });
+    } else {
+      init();
+    }
   }
 
   if (document.readyState === "loading") {
