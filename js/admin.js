@@ -196,6 +196,7 @@
         if (table === "works") {
           renderMasonryCards(wrap, res.data);
           attachMasonryDrag(wrap, table);
+          bindMasonryResize();
         } else if (table === "brands") {
           renderBrandGrid(wrap, res.data);
           attachMasonryDrag(wrap, table);
@@ -228,27 +229,72 @@
       });
   }
 
-  /* ---------- 作品瀑布流卡片 ---------- */
+  /* ---------- 作品瀑布流卡片（与网页一致：先铺满顶部，再依次向下堆） ---------- */
+  function masonryColumnCount(wrap) {
+    var w = wrap.clientWidth || window.innerWidth || 1200;
+    if (w <= 640) return 2;
+    if (w <= 1000) return 3;
+    if (w <= 1280) return 5;
+    return 7;
+  }
+
   function renderMasonryCards(wrap, rows) {
-    wrap.innerHTML = rows
-      .map(function (r) {
-        var ratio = r.ratio ? Number(r.ratio) : 0.75;
-        var isCard = r.section === "card";
-        return (
-          '<div class="adm-item" draggable="true" data-id="' + esc(r.id) + '">' +
-          '<span class="wf-badge ' + (isCard ? "b-card" : "b-gallery") + '">' + (isCard ? "首页卡片" : "瀑布页") + "</span>" +
-          '<span class="wf-grip" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>' +
-          '<img src="' + esc(r.img_url) + '" alt="' + esc(r.title) + '" draggable="false" loading="lazy" style="aspect-ratio:' + ratio.toFixed(4) + '">' +
-          '<div class="wf-actions">' +
-          '<button class="adm-btn adm-btn-small" data-act="edit">编辑</button>' +
-          '<button class="adm-btn adm-btn-small adm-btn-danger" data-act="del">删除</button>' +
-          "</div></div>"
-        );
-      })
-      .join("");
+    wrap.innerHTML = "";
+    var GAP = 8;
+    var cols = masonryColumnCount(wrap);
+    var colEls = [];
+    var colH = [];
+    for (var c = 0; c < cols; c++) {
+      var col = document.createElement("div");
+      col.className = "adm-masonry-col";
+      wrap.appendChild(col);
+      colEls.push(col);
+      colH.push(0);
+    }
+    var colW = (wrap.clientWidth - (cols - 1) * GAP) / cols;
+
+    rows.forEach(function (r) {
+      var ratio = r.ratio ? Number(r.ratio) : 0.75;
+      var tileH = colW / ratio + GAP;
+      // 放入当前最矮的一列，保证顶部先铺满（与公开网页瀑布流一致）
+      var min = 0;
+      for (var k = 1; k < cols; k++) {
+        if (colH[k] < colH[min]) min = k;
+      }
+      var isCard = r.section === "card";
+      var item = document.createElement("div");
+      item.className = "adm-item";
+      item.setAttribute("draggable", "true");
+      item.setAttribute("data-id", esc(r.id));
+      item.innerHTML =
+        '<span class="wf-badge ' + (isCard ? "b-card" : "b-gallery") + '">' + (isCard ? "首页卡片" : "瀑布页") + "</span>" +
+        '<span class="wf-grip" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>' +
+        '<img src="' + esc(r.img_url) + '" alt="' + esc(r.title) + '" draggable="false" loading="lazy" style="aspect-ratio:' + ratio.toFixed(4) + '">' +
+        '<div class="wf-actions">' +
+        '<button class="adm-btn adm-btn-small" data-act="edit">编辑</button>' +
+        '<button class="adm-btn adm-btn-small adm-btn-danger" data-act="del">删除</button>' +
+        "</div>";
+      colEls[min].appendChild(item);
+      colH[min] += tileH;
+    });
   }
 
   /* ---------- 拖拽排序 ---------- */
+  function bindMasonryResize() {
+    if (window.__admMasonryResize) return;
+    window.__admMasonryResize = true;
+    var timer = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var w = document.getElementById("list-works");
+        if (w && state.works.rows && state.works.rows.length && w.classList.contains("adm-masonry")) {
+          renderMasonryCards(w, state.works.rows);
+        }
+      }, 220);
+    });
+  }
+
   function attachDrag(wrap, table) {
     var dragId = null;
     wrap.addEventListener("dragstart", function (e) {
@@ -302,18 +348,25 @@
       if (!dragging) return;
       var under = document.elementFromPoint(e.clientX, e.clientY);
       var item = under && under.closest ? under.closest(".adm-item") : null;
-      if (item && item !== dragging && item.parentNode === wrap) {
+      if (item && item !== dragging) {
         var rect = item.getBoundingClientRect();
-        if (e.clientY < rect.top + rect.height / 2) wrap.insertBefore(dragging, item);
-        else wrap.insertBefore(dragging, item.nextSibling);
+        if (e.clientY < rect.top + rect.height / 2) item.parentNode.insertBefore(dragging, item);
+        else item.parentNode.insertBefore(dragging, item.nextSibling);
+      } else if (!item && under && under.closest) {
+        // 指针落在列空隙/列底部：放到该列末尾
+        var col = under.closest(".adm-masonry-col");
+        if (col) col.appendChild(dragging);
       }
     });
     wrap.addEventListener("dragend", function () {
       var item = wrap.querySelector(".adm-item.dragging");
       if (item) item.classList.remove("dragging");
       if (!dragId) return;
-      var ids = Array.prototype.map.call(wrap.querySelectorAll(".adm-item"), function (el) {
-        return el.getAttribute("data-id");
+      var ids = [];
+      Array.prototype.forEach.call(wrap.querySelectorAll(".adm-masonry-col"), function (col) {
+        Array.prototype.forEach.call(col.querySelectorAll(".adm-item"), function (el) {
+          ids.push(el.getAttribute("data-id"));
+        });
       });
       dragId = null;
       persistOrder(table, ids);

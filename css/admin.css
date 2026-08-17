@@ -476,13 +476,22 @@ body.page-admin {
 .brand-grid .adm-item:hover .wf-actions { opacity: 1; }
 .brand-grid .wf-actions { opacity: 0; }
 
-/* ==================== 作品 7 列瀑布流 ==================== */
-.adm-masonry { columns: 7; column-gap: 8px; }
+/* ==================== 作品瀑布流（与网页一致：先铺满顶部再向下堆） ==================== */
+.adm-masonry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.adm-masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .adm-masonry .adm-item {
   position: relative;
   display: block;
-  break-inside: avoid;
-  margin-bottom: 8px;
   padding: 0;
   overflow: hidden;
   cursor: grab;
