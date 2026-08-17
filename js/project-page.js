@@ -33,7 +33,7 @@
     var p = data.projects[index];
     loading.hidden = true;
     app.hidden = false;
-    document.title = p.title + " · 刘富强作品集";
+    document.title = "鹿云先生DESIGN 项目详情";
 
     document.getElementById("pTitle").textContent = p.title;
     document.getElementById("pDesc").textContent = p.desc;
