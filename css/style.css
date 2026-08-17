@@ -675,6 +675,7 @@ body.is-wt-active .nav-capsule.is-expanded {
    ============================================================ */
 .about {
   padding: 120px 0 140px;
+  overflow-x: clip; /* 裁掉右侧入场动画位移产生的横向溢出 */
 }
 
 .about-grid {
@@ -792,6 +793,7 @@ body.is-wt-active .nav-capsule.is-expanded {
 
 .exp-list {
   width: 100%;
+  overflow-x: clip; /* 裁掉入场动画 translateX 产生的横向溢出，避免页面可左右拖动 */
 }
 
 .exp-item {
@@ -931,6 +933,7 @@ body.is-wt-active .nav-capsule.is-expanded {
    ============================================================ */
 .cases {
   padding: 110px 0 130px;
+  overflow-x: clip; /* 裁掉右侧入场动画位移产生的横向溢出 */
 }
 
 .cases-head {
