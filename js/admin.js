@@ -812,9 +812,13 @@
         }
         if (missing) { toast(missing, true); return false; }
         var write = function () {
-          return st.row
-            ? supabase.from(table).update(payload).eq("id", st.row.id)
-            : supabase.from(table).insert(payload);
+          // supabase 的 insert/update 返回的是 thenable（没有 .catch），
+          // 包一层 Promise.resolve 才能安全地 catch 重试
+          return Promise.resolve(
+            st.row
+              ? supabase.from(table).update(payload).eq("id", st.row.id)
+              : supabase.from(table).insert(payload)
+          );
         };
         // 网络抖动时自动重试一次（仅网络类错误，避免重复插入）
         return write().catch(function (err) {
