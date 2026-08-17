@@ -18,6 +18,8 @@
     typeof ImageData !== "undefined" &&
     typeof document.createElement("canvas").getContext === "function";
   if (REDUCED || !FINE || !SUPPORTED) return;
+  // 轻量模式（弱设备 / 老内核 / 360）：液态玻璃透镜每帧克隆整页，最吃性能，直接关闭
+  if (window.__LITE_MODE) return;
 
   var LENS_D = 64;        // 可见玻璃直径（px）
   var MAP_SIZE = 64;      // 位移图分辨率（透镜仅 64px，64 已 1:1 足够）

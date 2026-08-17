@@ -7,6 +7,28 @@
   var data = window.SITE_DATA;
   var worksInited = false; // initWorks 重复调用时不再重复挂监听
 
+  /* ---------- 轻量模式：弱设备 / 老内核浏览器 / 360 浏览器自动关闭重特效 ---------- */
+  function detectLiteMode() {
+    if (window.__LITE_MODE !== undefined) return window.__LITE_MODE;
+    var lite = false;
+    try {
+      if (/[?&]lite=1/.test(location.search)) lite = true; // 手动强制
+      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) lite = true;
+      if (navigator.deviceMemory && navigator.deviceMemory <= 4) lite = true;
+      if (/360SE|360EE|QIHU/i.test(navigator.userAgent || "")) lite = true; // 360 浏览器
+      if (window.CSS && CSS.supports && !CSS.supports("backdrop-filter", "blur(1px)")) lite = true;
+    } catch (e) { /* 忽略 */ }
+    if (!("ResizeObserver" in window)) lite = true; // 老内核
+    window.__LITE_MODE = lite;
+    return lite;
+  }
+  var LITE = detectLiteMode();
+  if (LITE) {
+    // 轻量模式：隐藏鼠标玻璃光圈元素，避免 CSS 把它显示成一个静止圆点
+    var cgEl = document.getElementById("cursorGlass");
+    if (cgEl) cgEl.style.display = "none";
+  }
+
   /* ---------- 数据替换：云端数据就绪后更新（保留本地兜底） ---------- */
   function useData(d) {
     if (!d) return;
@@ -174,6 +196,7 @@
   function initCursorGlass() {
     var glass = document.getElementById("cursorGlass");
     if (!glass) return;
+    if (LITE) return; // 轻量模式：关闭鼠标玻璃光圈
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     var size = 90;
@@ -204,7 +227,7 @@
   function initAurora() {
     var container = document.getElementById("auroraBg");
     if (!container) return;
-    if (isMobile()) return; // 移动端去掉底部弥散渐变动效
+    if (isMobile() || LITE) return; // 移动端 / 轻量模式去掉底部弥散渐变动效
 
     var VERT = "#version 300 es\n" +
       "in vec2 position;\n" +
@@ -389,6 +412,7 @@
   function initTiltCard() {
     var card = document.getElementById("aboutPhoto");
     if (!card) return;
+    if (LITE) return; // 轻量模式：跳过鼠标 3D 倾斜
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     var amplitude = 10;
@@ -712,6 +736,7 @@
     var photo = document.querySelector(".about-photo");
     var titleHolder = document.getElementById("aboutTitle");
     if (!overlay || !block || !text || !works || !about || !grid || !aboutCopy || !photo || !titleHolder) return;
+    if (LITE) return; // 轻量模式：跳过作品区 → 个人介绍 过渡动画
 
     var TEXT_SCALE = 58 / 110; // 大字 110px → 标题 58px
     var RADIUS = 22;           // 与形象照圆角一致
@@ -1611,7 +1636,7 @@
       });
 
       filterEl.classList.remove("active");
-      if (withParticles) {
+      if (withParticles && !LITE) {
         makeParticles(filterEl);
       } else {
         void filterEl.offsetWidth;
