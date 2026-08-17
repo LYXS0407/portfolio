@@ -81,6 +81,9 @@
       var img = document.createElement("img");
       img.alt = w.title || "作品";
       img.loading = "lazy";
+      if (i < 8) {
+        try { img.fetchPriority = "high"; } catch (e) { /* 忽略 */ }
+      }
       try { img.decoding = "async"; } catch (e) { /* 忽略 */ }
       if (ratio) img.style.aspectRatio = ratio.toFixed(4);
       img.src = w.img;
