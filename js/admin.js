@@ -36,6 +36,62 @@
     return String(v || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
+  /* ---------- 轻量重试（上传等瞬时失败自动重试，避免弹红色报错） ---------- */
+  function withRetry(fn, times, delay) {
+    var attempt = 0;
+    function tryOnce() {
+      return fn().catch(function (err) {
+        attempt++;
+        if (attempt < times) {
+          return new Promise(function (res) { setTimeout(res, delay || 700); }).then(tryOnce);
+        }
+        throw err;
+      });
+    }
+    return tryOnce();
+  }
+
+  function isNetworkErr(err) {
+    var m = String((err && (err.message || err.error_description)) || "");
+    return /fetch|network|timeout|econn|socket|load failed|failed to connect|abort/i.test(m);
+  }
+
+  /* ---------- 图片压缩：等比缩放 + 转 WebP，尽量保持画质 ---------- */
+  function compressImage(file, maxDim) {
+    return new Promise(function (resolve) {
+      if (!file || !file.type || file.type.indexOf("image/") !== 0) return resolve(file);
+      var name = file.name || "";
+      if (/\.gif$/i.test(name) || file.type === "image/gif") return resolve(file);
+      if (/\.svg$/i.test(name) || file.type === "image/svg+xml") return resolve(file);
+      var url = URL.createObjectURL(file);
+      var im = new Image();
+      im.onload = function () {
+        try {
+          var w = im.naturalWidth || 1;
+          var h = im.naturalHeight || 1;
+          var scale = Math.min(1, (maxDim || 1600) / Math.max(w, h));
+          var tw = Math.max(1, Math.round(w * scale));
+          var th = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement("canvas");
+          canvas.width = tw;
+          canvas.height = th;
+          canvas.getContext("2d").drawImage(im, 0, 0, tw, th);
+          canvas.toBlob(function (blob) {
+            URL.revokeObjectURL(url);
+            if (!blob) return resolve(file);
+            var outName = name.replace(/\.[^.]+$/, "") + ".webp";
+            resolve(new File([blob], outName, { type: "image/webp" }));
+          }, "image/webp", 0.9);
+        } catch (err) {
+          URL.revokeObjectURL(url);
+          resolve(file);
+        }
+      };
+      im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      im.src = url;
+    });
+  }
+
   var state = {
     works: { rows: [], row: null, pendingFiles: {}, removedImages: [] },
     projects: { rows: [], row: null, pendingFiles: {}, removedImages: [] },
@@ -146,13 +202,16 @@
     // 存储对象名只允许安全的 ASCII 字符（中文等会被 Supabase 拒绝）
     var safeName = String(file.name || "file").replace(/[^\w.-]+/g, "_").replace(/^_+|_+$/g, "");
     var path = folder + "/" + Date.now() + "-" + safeName;
-    return supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: false, contentType: file.type || "application/octet-stream" })
-      .then(function (res) {
-        if (res.error) throw res.error;
-        return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
-      });
+    // 网络抖动自动重试（upsert 保证重试不会因对象已存在而报错）
+    return withRetry(function () {
+      return supabase.storage
+        .from(bucket)
+        .upload(path, file, { upsert: true, contentType: file.type || "application/octet-stream" })
+        .then(function (res) {
+          if (res.error) throw res.error;
+          return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+        });
+    }, 3, 700);
   }
   function imageRatio(file) {
     return new Promise(function (resolve) {
@@ -553,13 +612,18 @@
         var files = Array.prototype.slice.call(inp.files || []);
         if (!files.length) return;
         inp.value = ""; // 清空输入框，允许重复选择同一文件
+        var MAX = { img_url: 1600, cover_url: 1200, logo_url: 512 }[key] || 1600;
         if (key === "images") {
           // 详情长图：多选，追加到待上传列表并生成可单独删除的预览
           st.pendingFiles.images = st.pendingFiles.images || [];
           var box = wrap.querySelector("#projImgs");
           files.forEach(function (f) {
             var url = URL.createObjectURL(f);
-            st.pendingFiles.images.push({ url: url, file: f });
+            var entry = { url: url, file: f };
+            st.pendingFiles.images.push(entry);
+            compressImage(f, 1600).then(function (cf) {
+              if (entry.file === f) entry.file = cf;
+            });
             if (box) {
               box.insertAdjacentHTML("beforeend",
                 '<span class="adm-img-item new" data-u="' + url + '">' +
@@ -570,6 +634,9 @@
         }
         // 单图 / 单文件字段：预览 + 可移除
         st.pendingFiles[key] = files[0];
+        compressImage(files[0], MAX).then(function (cf) {
+          if (st.pendingFiles[key] === files[0]) st.pendingFiles[key] = cf;
+        });
         var pv = wrap.querySelector('[data-preview="' + key + '"]');
         if (pv) {
           pv.innerHTML = "";
@@ -637,6 +704,21 @@
   }
 
   function saveForm(table, wrap) {
+    // 防止重复点击造成多次提交/重复报错
+    if (wrap.getAttribute("data-saving") === "1") return;
+    wrap.setAttribute("data-saving", "1");
+    var saveBtn = wrap.querySelector('[data-save]');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "保存中…";
+    }
+    function done() {
+      wrap.setAttribute("data-saving", "0");
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "保存";
+      }
+    }
     var st = state[table];
     var get = function (name) {
       var el = wrap.querySelector('[name="' + name + '"]');
@@ -729,12 +811,19 @@
           else if (!payload.logo_url) missing = "请先上传 LOGO 图片";
         }
         if (missing) { toast(missing, true); return false; }
-        var op = st.row
-          ? supabase.from(table).update(payload).eq("id", st.row.id)
-          : supabase.from(table).insert(payload);
-        return op;
+        var write = function () {
+          return st.row
+            ? supabase.from(table).update(payload).eq("id", st.row.id)
+            : supabase.from(table).insert(payload);
+        };
+        // 网络抖动时自动重试一次（仅网络类错误，避免重复插入）
+        return write().catch(function (err) {
+          if (!isNetworkErr(err)) throw err;
+          return new Promise(function (res) { setTimeout(res, 800); }).then(write);
+        });
       })
       .then(function (res) {
+        done();
         if (res === false) return; // 必填校验未通过，已提示
         if (!res) throw new Error("请求无响应，请重试");
         if (res.error) throw res.error;
@@ -743,6 +832,7 @@
         loadList(table);
       })
       .catch(function (err) {
+        done();
         toast("保存失败：" + err.message, true);
       });
   }
@@ -806,6 +896,10 @@
         var f = inp.files && inp.files[0];
         if (!f) return;
         st.pendingFiles[key] = f;
+        var MAX = { portrait_url: 1200, hero_poster_url: 1600 }[key] || 1600;
+        compressImage(f, MAX).then(function (cf) {
+          if (st.pendingFiles[key] === f) st.pendingFiles[key] = cf;
+        });
         var pv = wrap.querySelector('[data-preview="' + key + '"]');
         if (pv) {
           pv.innerHTML = "";

@@ -1166,7 +1166,8 @@
     if (!grid || !data) return;
 
     grid.innerHTML = "";
-    data.projects.forEach(function (p, i) {
+    // 首页案例只展示前 3 个（移动端/电脑端一致），更多到项目页查看
+    data.projects.slice(0, 3).forEach(function (p, i) {
       var a = document.createElement("a");
       a.className = "case-card";
       a.href = "project.html?id=" + p.id;

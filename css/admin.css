@@ -682,8 +682,6 @@ body.page-admin {
 .adm-empty { color: var(--text-faint); font-size: 13px; padding: 18px 0; }
 
 /* ==================== 响应式 ==================== */
-@media (max-width: 1560px) { .adm-masonry { columns: 5; } }
-@media (max-width: 1180px) { .adm-masonry { columns: 3; } }
 @media (max-width: 900px) {
   .adm-side { width: 64px; }
   .adm-side-brand { font-size: 0; padding: 20px 0; text-align: center; }
