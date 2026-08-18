@@ -1649,6 +1649,14 @@ body.is-wt-active .nav-capsule.is-expanded {
   font-size: 38px;
 }
 
+/* 全部项目页（projects.html）：对齐作品展示页的紧凑标题间距 */
+.page-projects .subpage-hero {
+  padding: calc(var(--nav-h) + 20px) 0 14px;
+}
+.page-projects .gallery-head {
+  margin-bottom: 14px;
+}
+
 .page-works .waterfall {
   display: flex;
   align-items: flex-start;
