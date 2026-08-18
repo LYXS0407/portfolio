@@ -721,3 +721,45 @@ body.page-admin {
   .adm-masonry { columns: 2; }
 }
 @media (max-width: 560px) { .adm-masonry { columns: 2; } }
+
+/* ===== 站点设置：分区卡片 + 吸底保存条（2026-08-18 布局优化） ===== */
+.adm-settings { display: flex; flex-direction: column; gap: 16px; }
+.adm-sec {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px 20px 20px;
+}
+.adm-sec-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.adm-sec-title small { color: var(--text-faint); font-weight: 400; font-size: 12px; }
+.adm-sec .adm-form-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.adm-field.full { grid-column: 1 / -1; }
+.adm-file-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 18px; }
+.adm-form-actions.adm-sticky {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  margin-top: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.adm-form-actions.adm-sticky .adm-btn { flex: 0 0 auto; min-width: 150px; }
+.adm-save-hint { color: var(--text-faint); font-size: 12px; }
+@media (max-width: 560px) {
+  .adm-form-actions.adm-sticky { flex-direction: column; align-items: stretch; }
+  .adm-form-actions.adm-sticky .adm-btn { width: 100%; }
+}

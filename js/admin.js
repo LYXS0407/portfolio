@@ -929,7 +929,15 @@
     var st = state.settings;
     st.pendingFiles = {};
     var t = function (k) { return textInput(k, s[k]); };
+    function fl(label, input, mod) {
+      return '<div class="adm-field' + (mod ? " " + mod : "") + '"><label>' + label + "</label>" + input + "</div>";
+    }
+    function sec(title, sub, inner) {
+      return '<section class="adm-sec"><h3 class="adm-sec-title">' + title + (sub ? " <small>" + sub + "</small>" : "") + "</h3>" + inner + "</section>";
+    }
+    function grid(inner) { return '<div class="adm-form-grid">' + inner + "</div>"; }
     var html =
+      '<div class="adm-settings">' +
       '<div class="adm-compress-box">' +
       '<h3>上传压缩设置 <small>仅本机浏览器记住</small></h3>' +
       '<label class="adm-toggle"><input type="checkbox" id="compressToggle"' + (COMPRESS.enabled ? " checked" : "") + '> 上传图片时自动压缩（转 WebP）</label>' +
@@ -937,28 +945,37 @@
       '<input type="range" id="compressQ" min="60" max="95" step="5" value="' + Math.round(COMPRESS.quality * 100) + '"></label>' +
       '<p class="adm-hint">各字段最长边上限：作品 1600 · 封面 1200 · 形象照 1200 · 视频封面 1600 · LOGO 512（px）。GIF / SVG 不压缩。</p>' +
       '</div>' +
-      '<div class="adm-form-grid">' +
-      fieldHTML("姓名", t("name")) +
-      fieldHTML("英文名", t("name_en")) +
-      fieldHTML("中文头衔", t("role_cn")) +
-      fieldHTML("英文头衔", t("role_en")) +
-      fieldHTML("Slogan", t("slogan")) +
-      fieldHTML("Slogan 中文", t("slogan_cn")) +
-      fieldHTML("教育经历", t("education")) +
-      fieldHTML("个人简介（每行一段）", '<textarea name="about">' + esc((s.about || []).join("\n")) + "</textarea>") +
-      fieldHTML("邮箱", t("email")) +
-      fieldHTML("微信", t("wechat")) +
-      fieldHTML("小红书标题", t("xhs_label")) +
-      fieldHTML("小红书账号", t("xhs_account")) +
-      fieldHTML("小红书链接", t("xhs_url")) +
-      fieldHTML("联系我口号（联系版块下方的小字）", '<textarea name="contact_desc" style="min-height:56px">' + esc(s.contact_desc || "") + "</textarea>") +
-      "</div>" +
-      fileFieldHTML("portrait_url", "个人形象照（png / jpg / webp）", "images", s.portrait_url, "image/*") +
-      fileFieldHTML("hero_video_url", "首页视频（mp4，上传即替换）", "files", s.hero_video_url, "video/mp4") +
-      fileFieldHTML("hero_poster_url", "视频封面图", "files", s.hero_poster_url, "image/*") +
-      fileFieldHTML("resume_url", "简历 PDF", "files", s.resume_url, "application/pdf") +
-      fileFieldHTML("portfolio_url", "作品集 PDF", "files", s.portfolio_url, "application/pdf") +
-      '<div class="adm-form-actions"><button class="adm-btn" type="button" id="saveSettings">保存设置</button></div>';
+      sec("个人信息", "", grid(
+        fl("姓名", t("name")) +
+        fl("英文名", t("name_en")) +
+        fl("中文头衔", t("role_cn")) +
+        fl("英文头衔", t("role_en")) +
+        fl("教育经历", t("education")) +
+        fl("个人简介（每行一段）", '<textarea name="about">' + esc((s.about || []).join("\n")) + "</textarea>", "full")
+      )) +
+      sec("标语与口号", "", grid(
+        fl("Slogan", t("slogan")) +
+        fl("Slogan 中文", t("slogan_cn"))
+      )) +
+      sec("联系方式", "", grid(
+        fl("邮箱", t("email")) +
+        fl("微信", t("wechat")) +
+        fl("小红书标题", t("xhs_label")) +
+        fl("小红书账号", t("xhs_account")) +
+        fl("小红书链接", t("xhs_url")) +
+        fl("联系我口号（联系版块下方的小字）", '<textarea name="contact_desc" style="min-height:56px">' + esc(s.contact_desc || "") + "</textarea>", "full")
+      )) +
+      sec("媒体资源", "图片 / 视频 / PDF，上传即替换",
+        '<div class="adm-file-grid">' +
+        fileFieldHTML("portrait_url", "个人形象照（png / jpg / webp）", "images", s.portrait_url, "image/*") +
+        fileFieldHTML("hero_video_url", "首页视频（mp4，上传即替换）", "files", s.hero_video_url, "video/mp4") +
+        fileFieldHTML("hero_poster_url", "视频封面图", "files", s.hero_poster_url, "image/*") +
+        fileFieldHTML("resume_url", "简历 PDF", "files", s.resume_url, "application/pdf") +
+        fileFieldHTML("portfolio_url", "作品集 PDF", "files", s.portfolio_url, "application/pdf") +
+        '</div>'
+      ) +
+      '</div>' +
+      '<div class="adm-form-actions adm-sticky"><button class="adm-btn" type="button" id="saveSettings">保存设置</button><span class="adm-save-hint">修改后点此保存，公开页面下次加载生效</span></div>';
     $("#form-settings").innerHTML = html;
     var wrap = $("#form-settings");
     var ct = wrap.querySelector("#compressToggle");
