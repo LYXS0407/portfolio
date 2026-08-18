@@ -16,7 +16,7 @@
       <a class="brand" href="index.html#home" aria-label="返回首页">
         <img src="assets/logo.png" alt="刘富强 LFQ">
       </a>
-      <button class="nav-back" id="navBack" type="button" aria-label="返回上一页">
+      <button class="nav-back" id="navBackHeader" type="button" aria-label="返回上一页">
         <img src="assets/contacts/arrow.svg" alt="返回">
       </button>
 
@@ -58,9 +58,14 @@
     <section class="subpage-hero">
       <div class="container">
         <div class="gallery-head">
-          <div>
-            <p class="sec-en" data-split>ALL PROJECTS</p>
-            <h1 class="gallery-title" data-split data-split-delay="250">全部项目</h1>
+          <div class="gallery-head-title" id="navBack" role="button" tabindex="0" aria-label="返回上一页" title="返回上一页">
+            <div>
+              <p class="sec-en" data-split>ALL PROJECTS</p>
+              <div class="gallery-title-row">
+                <img class="gallery-back-icon" src="assets/contacts/arrow.svg" alt="">
+                <h1 class="gallery-title" data-split data-split-delay="250">全部项目</h1>
+              </div>
+            </div>
           </div>
           <p class="gallery-count" id="galleryCount" data-reveal="up" data-delay="1"></p>
         </div>
@@ -90,7 +95,7 @@
   <script src="js/vendor/supabase.min.js?v=20260817e" async></script>
   <script src="js/site-data-provider.js?v=20260817t"></script>
   <script src="js/analytics.js?v=20260817q"></script>
-  <script src="js/projects-page.js?v=20260817t"></script>
+  <script src="js/projects-page.js?v=20260818f"></script>
   <script src="js/main.js?v=20260817u"></script>
 </body>
 </html>

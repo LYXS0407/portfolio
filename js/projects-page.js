@@ -9,15 +9,27 @@
   var countEl = document.getElementById("galleryCount");
   if (!data || !waterfall) return;
 
+  /* 返回上一页：电脑端点标题区域 / 移动端点左上角返回箭头（无历史则回首页），与作品展示页一致 */
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "index.html";
+    }
+  }
   var backBtn = document.getElementById("navBack");
-  if (backBtn) {
-    backBtn.addEventListener("click", function () {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "index.html";
+  if (backBtn && window.innerWidth >= 1100) {
+    backBtn.addEventListener("click", goBack);
+    backBtn.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goBack();
       }
     });
+  }
+  var backHeader = document.getElementById("navBackHeader");
+  if (backHeader && window.innerWidth < 1100) {
+    backHeader.addEventListener("click", goBack);
   }
 
   function renderGrid() {
