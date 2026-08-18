@@ -681,6 +681,33 @@ body.page-admin {
 }
 .adm-empty { color: var(--text-faint); font-size: 13px; padding: 18px 0; }
 
+/* ==================== 上传压缩控制 + 大小提示 ==================== */
+.adm-compress-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.adm-compress-box h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.adm-compress-box h3 small { color: var(--text-faint); font-weight: 400; font-size: 12px; margin-left: 6px; }
+.adm-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); cursor: pointer; margin-bottom: 12px; }
+.adm-toggle input { width: 16px; height: 16px; accent-color: var(--green); }
+.adm-range { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
+.adm-range span { min-width: 42px; color: var(--text); font-variant-numeric: tabular-nums; }
+.adm-range input[type=range] { flex: 1; accent-color: var(--green); }
+.adm-compress-box .adm-hint { color: var(--text-faint); font-size: 12px; line-height: 1.6; margin-top: 6px; }
+
+.fp-size {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.fp-size.fp-ok { color: var(--green); }
+.fp-size.fp-skip { color: var(--text-faint); }
+
 /* ==================== 响应式 ==================== */
 @media (max-width: 900px) {
   .adm-side { width: 64px; }

@@ -56,13 +56,41 @@
     return /fetch|network|timeout|econn|socket|load failed|failed to connect|abort/i.test(m);
   }
 
-  /* ---------- 图片压缩：等比缩放 + 转 WebP，尽量保持画质 ---------- */
+  /* ---------- 上传压缩配置（在后台「站点设置」里可调，持久化到本机 localStorage） ---------- */
+  var COMPRESS = { enabled: true, quality: 0.9 };
+  (function loadCompressCfg() {
+    try {
+      var s = localStorage.getItem("lfq_compress");
+      if (s) {
+        var o = JSON.parse(s);
+        if (typeof o.enabled === "boolean") COMPRESS.enabled = o.enabled;
+        if (typeof o.quality === "number") COMPRESS.quality = Math.min(0.95, Math.max(0.5, o.quality));
+      }
+    } catch (e) { /* 忽略损坏的配置 */ }
+  })();
+  function saveCompressCfg() {
+    try { localStorage.setItem("lfq_compress", JSON.stringify({ enabled: COMPRESS.enabled, quality: COMPRESS.quality })); } catch (e) { /* 忽略 */ }
+  }
+  function fmtSize(bytes) {
+    if (bytes === null || bytes === undefined) return "—";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1048576) return (bytes / 1024).toFixed(0) + " KB";
+    return (bytes / 1048576).toFixed(2) + " MB";
+  }
+
+  /* ---------- 图片压缩：等比缩放 + 转 WebP ---------- */
+  /* 返回 Promise<{ file, originalSize, compressedSize, saved, skipped, skipReason }>，
+     调用方把整个 Promise 存进 pendingFiles，保存时 Promise.resolve 即可确保压缩先完成（避免竞态）。 */
   function compressImage(file, maxDim) {
     return new Promise(function (resolve) {
-      if (!file || !file.type || file.type.indexOf("image/") !== 0) return resolve(file);
+      var passthrough = function (reason) {
+        resolve({ file: file, originalSize: file && file.size, compressedSize: file && file.size, saved: 0, skipped: true, skipReason: reason || "" });
+      };
+      if (!COMPRESS.enabled) return passthrough("disabled");
+      if (!file || !file.type || file.type.indexOf("image/") !== 0) return passthrough("format");
       var name = file.name || "";
-      if (/\.gif$/i.test(name) || file.type === "image/gif") return resolve(file);
-      if (/\.svg$/i.test(name) || file.type === "image/svg+xml") return resolve(file);
+      if (/\.gif$/i.test(name) || file.type === "image/gif") return passthrough("format");
+      if (/\.svg$/i.test(name) || file.type === "image/svg+xml") return passthrough("format");
       var url = URL.createObjectURL(file);
       var im = new Image();
       im.onload = function () {
@@ -78,18 +106,31 @@
           canvas.getContext("2d").drawImage(im, 0, 0, tw, th);
           canvas.toBlob(function (blob) {
             URL.revokeObjectURL(url);
-            if (!blob) return resolve(file);
+            if (!blob) return passthrough("format");
             var outName = name.replace(/\.[^.]+$/, "") + ".webp";
-            resolve(new File([blob], outName, { type: "image/webp" }));
-          }, "image/webp", 0.9);
+            var cf = new File([blob], outName, { type: "image/webp" });
+            resolve({ file: cf, originalSize: file.size, compressedSize: blob.size, saved: file.size - blob.size, skipped: false, skipReason: "" });
+          }, "image/webp", COMPRESS.quality);
         } catch (err) {
           URL.revokeObjectURL(url);
-          resolve(file);
+          passthrough("format");
         }
       };
-      im.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      im.onerror = function () { URL.revokeObjectURL(url); passthrough("format"); };
       im.src = url;
     });
+  }
+
+  /* ---------- 压缩前后大小提示 ---------- */
+  function sizeLabel(info) {
+    if (info && info.skipped) {
+      var reason = info.skipReason === "disabled" ? "压缩已关闭" : "该格式不压缩";
+      return '<span class="fp-size fp-skip">' + reason + "（" + fmtSize(info.originalSize) + "）</span>";
+    }
+    if (!info || !info.originalSize) return '<span class="fp-size">压缩完成</span>';
+    var pct = info.originalSize > 0 ? Math.round((info.saved / info.originalSize) * 100) : 0;
+    if (info.saved <= 0) return '<span class="fp-size fp-skip">原图 ' + fmtSize(info.originalSize) + " · 压缩后反而变大，保留原图</span>";
+    return '<span class="fp-size fp-ok">原图 ' + fmtSize(info.originalSize) + " → " + fmtSize(info.compressedSize) + "（省 " + pct + "%）</span>";
   }
 
   var state = {
@@ -191,6 +232,10 @@
     if (btn.getAttribute("data-tab") === "dashboard") renderDashboard();
     if (btn.getAttribute("data-tab") === "analytics") loadAnalytics("7d");
     if (btn.getAttribute("data-tab") === "settings") renderSettingsInline();
+    if (btn.getAttribute("data-tab") === "works" && state.works.rows && state.works.rows.length) {
+      // 面板刚由隐藏变为可见，用真实宽度重排瀑布流，避免首屏隐藏态下算错列宽
+      renderMasonryCards($("#list-works"), state.works.rows);
+    }
     if (btn.getAttribute("data-tab") === "preview") {
       var frame = $("#previewFrame");
       if (frame && !frame.getAttribute("src")) frame.setAttribute("src", "index.html");
@@ -289,18 +334,20 @@
   }
 
   /* ---------- 作品瀑布流卡片（与网页一致：先铺满顶部，再依次向下堆） ---------- */
-  function masonryColumnCount(wrap) {
-    var w = wrap.clientWidth || window.innerWidth || 1200;
-    if (w <= 640) return 2;
-    if (w <= 1000) return 3;
-    if (w <= 1280) return 5;
+  function masonryColumnCount(ww) {
+    if (ww <= 640) return 2;
+    if (ww <= 1000) return 3;
+    if (ww <= 1280) return 5;
     return 7;
   }
 
   function renderMasonryCards(wrap, rows) {
     wrap.innerHTML = "";
     var GAP = 8;
-    var cols = masonryColumnCount(wrap);
+    // 容器可能在隐藏态（display:none）被渲染，此时 clientWidth 为 0，
+    // 会让列宽算成负数、所有卡片塌陷进最左一列。用窗口宽度兜底，保证布局正确。
+    var avail = wrap.clientWidth || window.innerWidth || 1200;
+    var cols = masonryColumnCount(avail);
     var colEls = [];
     var colH = [];
     for (var c = 0; c < cols; c++) {
@@ -310,11 +357,13 @@
       colEls.push(col);
       colH.push(0);
     }
-    var colW = (wrap.clientWidth - (cols - 1) * GAP) / cols;
+    var colW = (avail - (cols - 1) * GAP) / cols;
 
     rows.forEach(function (r) {
       var ratio = r.ratio ? Number(r.ratio) : 0.75;
+      if (!(ratio > 0)) ratio = 0.75; // 防 0 / NaN 把高度算崩
       var tileH = colW / ratio + GAP;
+      if (!(tileH > 0)) tileH = colW + GAP; // 兜底，避免负值让卡片全塌进同一列
       // 放入当前最矮的一列，保证顶部先铺满（与公开网页瀑布流一致）
       var min = 0;
       for (var k = 1; k < cols; k++) {
@@ -619,25 +668,27 @@
           var box = wrap.querySelector("#projImgs");
           files.forEach(function (f) {
             var url = URL.createObjectURL(f);
-            var entry = { url: url, file: f };
+            var item = document.createElement("span");
+            item.className = "adm-img-item new";
+            item.setAttribute("data-u", url);
+            item.innerHTML = '<img src="' + url + '" alt=""><em class="fp-size">压缩中…</em><button type="button" data-rmnew="' + url + '" title="删除这张">×</button>';
+            if (box) box.appendChild(item);
+            var em = item.querySelector(".fp-size");
+            // 把压缩 Promise 直接存进待上传项，保存时 Promise.resolve 即确保压缩先完成
+            var entry = {
+              url: url,
+              file: compressImage(f, 1600).then(function (info) {
+                if (em) em.outerHTML = sizeLabel(info);
+                return info.file;
+              })
+            };
             st.pendingFiles.images.push(entry);
-            compressImage(f, 1600).then(function (cf) {
-              if (entry.file === f) entry.file = cf;
-            });
-            if (box) {
-              box.insertAdjacentHTML("beforeend",
-                '<span class="adm-img-item new" data-u="' + url + '">' +
-                '<img src="' + url + '" alt=""><button type="button" data-rmnew="' + url + '" title="删除这张">×</button></span>');
-            }
           });
           return;
         }
-        // 单图 / 单文件字段：预览 + 可移除
-        st.pendingFiles[key] = files[0];
-        compressImage(files[0], MAX).then(function (cf) {
-          if (st.pendingFiles[key] === files[0]) st.pendingFiles[key] = cf;
-        });
+        // 单图 / 单文件字段：预览 + 可移除（压缩 Promise 存进 pendingFiles，避免竞态）
         var pv = wrap.querySelector('[data-preview="' + key + '"]');
+        var singleEm = null;
         if (pv) {
           pv.innerHTML = "";
           var isImg = files[0].type && files[0].type.indexOf("image/") === 0;
@@ -645,8 +696,14 @@
             '<span class="fp-item' + (isImg ? "" : " noimg") + '">' +
             (isImg ? '<img src="' + URL.createObjectURL(files[0]) + '">' : "") +
             "<i>" + esc(files[0].name) + "</i>" +
+            '<em class="fp-size">压缩中…</em>' +
             '<button type="button" data-clearpv="' + key + '" title="移除">×</button></span>');
+          singleEm = pv.querySelector(".fp-size");
         }
+        st.pendingFiles[key] = compressImage(files[0], MAX).then(function (info) {
+          if (singleEm) singleEm.outerHTML = sizeLabel(info);
+          return info.file;
+        });
         if (key === "img_url" && table === "works") {
           imageRatio(files[0]).then(function (ratio) {
             var ratioInput = wrap.querySelector('input[name="ratio"]');
@@ -729,11 +786,14 @@
     var payload = {};
 
     function doUpload(key) {
-      var f = st.pendingFiles[key];
-      if (!f) return Promise.resolve(null);
-      var bucket = key === "hero_video_url" || key === "hero_poster_url" || key === "resume_url" || key === "portfolio_url" ? "files" : "images";
-      var folder = key === "resume_url" || key === "portfolio_url" ? "files" : key === "hero_video_url" || key === "hero_poster_url" ? "hero" : "images";
-      return uploadFile(bucket, f, folder);
+      var pf = st.pendingFiles[key];
+      if (!pf) return Promise.resolve(null);
+      return Promise.resolve(pf).then(function (f) {
+        if (!f) return null;
+        var bucket = key === "hero_video_url" || key === "hero_poster_url" || key === "resume_url" || key === "portfolio_url" ? "files" : "images";
+        var folder = key === "resume_url" || key === "portfolio_url" ? "files" : key === "hero_video_url" || key === "hero_poster_url" ? "hero" : "images";
+        return uploadFile(bucket, f, folder);
+      });
     }
 
     if (table === "works") {
@@ -770,7 +830,7 @@
         else if (st.row && st.row.cover_url) payload.cover_url = st.row.cover_url;
       }));
       uploads.push(Promise.all((st.pendingFiles.images || []).map(function (item) {
-        return uploadFile("images", item.file, "projects");
+        return Promise.resolve(item.file).then(function (f) { return uploadFile("images", f, "projects"); });
       })).then(function (urls) {
         payload.images = payload.images.concat(urls);
       }));
@@ -870,6 +930,13 @@
     st.pendingFiles = {};
     var t = function (k) { return textInput(k, s[k]); };
     var html =
+      '<div class="adm-compress-box">' +
+      '<h3>上传压缩设置 <small>仅本机浏览器记住</small></h3>' +
+      '<label class="adm-toggle"><input type="checkbox" id="compressToggle"' + (COMPRESS.enabled ? " checked" : "") + '> 上传图片时自动压缩（转 WebP）</label>' +
+      '<label class="adm-range">压缩质量 <span id="compressQLabel">' + Math.round(COMPRESS.quality * 100) + '%</span>' +
+      '<input type="range" id="compressQ" min="60" max="95" step="5" value="' + Math.round(COMPRESS.quality * 100) + '"></label>' +
+      '<p class="adm-hint">各字段最长边上限：作品 1600 · 封面 1200 · 形象照 1200 · 视频封面 1600 · LOGO 512（px）。GIF / SVG 不压缩。</p>' +
+      '</div>' +
       '<div class="adm-form-grid">' +
       fieldHTML("姓名", t("name")) +
       fieldHTML("英文名", t("name_en")) +
@@ -894,17 +961,23 @@
       '<div class="adm-form-actions"><button class="adm-btn" type="button" id="saveSettings">保存设置</button></div>';
     $("#form-settings").innerHTML = html;
     var wrap = $("#form-settings");
+    var ct = wrap.querySelector("#compressToggle");
+    if (ct) ct.addEventListener("change", function () { COMPRESS.enabled = ct.checked; saveCompressCfg(); });
+    var cq = wrap.querySelector("#compressQ");
+    if (cq) cq.addEventListener("input", function () {
+      COMPRESS.quality = parseInt(cq.value, 10) / 100;
+      var lbl = wrap.querySelector("#compressQLabel");
+      if (lbl) lbl.textContent = cq.value + "%";
+      saveCompressCfg();
+    });
     Array.prototype.forEach.call(wrap.querySelectorAll("input[type=file]"), function (inp) {
       inp.addEventListener("change", function () {
         var key = inp.getAttribute("name");
         var f = inp.files && inp.files[0];
         if (!f) return;
-        st.pendingFiles[key] = f;
         var MAX = { portrait_url: 1200, hero_poster_url: 1600 }[key] || 1600;
-        compressImage(f, MAX).then(function (cf) {
-          if (st.pendingFiles[key] === f) st.pendingFiles[key] = cf;
-        });
         var pv = wrap.querySelector('[data-preview="' + key + '"]');
+        var em = null;
         if (pv) {
           pv.innerHTML = "";
           var isImg = f.type && f.type.indexOf("image/") === 0;
@@ -912,8 +985,15 @@
             '<span class="fp-item' + (isImg ? "" : " noimg") + '">' +
             (isImg ? '<img src="' + URL.createObjectURL(f) + '">' : "") +
             "<i>" + esc(f.name) + "</i>" +
+            '<em class="fp-size">压缩中…</em>' +
             '<button type="button" data-clearpv="' + key + '" title="移除">×</button></span>');
+          em = pv.querySelector(".fp-size");
         }
+        // 把压缩 Promise 存进 pendingFiles，保存时 Promise.resolve 确保先压缩再上传
+        st.pendingFiles[key] = compressImage(f, MAX).then(function (info) {
+          if (em) em.outerHTML = sizeLabel(info);
+          return info.file;
+        });
         inp.value = "";
       });
     });
@@ -961,10 +1041,12 @@
     ];
     var tasks = files.map(function (file) {
       var k = file.key;
-      var f = st.pendingFiles[k];
-      if (f) return uploadFile(file.bucket, f, file.folder).then(function (u) { payload[k] = u; });
-      if (s[k]) payload[k] = s[k];
-      return Promise.resolve();
+      var pf = st.pendingFiles[k];
+      if (!pf) { if (s[k]) payload[k] = s[k]; return Promise.resolve(); }
+      return Promise.resolve(pf).then(function (f) {
+        if (!f) { if (s[k]) payload[k] = s[k]; return; }
+        return uploadFile(file.bucket, f, file.folder).then(function (u) { payload[k] = u; });
+      });
     });
     toast("保存中…");
     Promise.all(tasks)
