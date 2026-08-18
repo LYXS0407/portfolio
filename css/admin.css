@@ -54,7 +54,7 @@ body.page-admin {
   border-bottom: 1px solid var(--line);
   color: var(--text);
 }
-.adm-side-brand img { width: 24px; height: 24px; object-fit: contain; flex: 0 0 auto; }
+.adm-side-brand img { width: 40px; height: 40px; object-fit: contain; flex: 0 0 auto; border-radius: 8px; }
 .adm-side-nav {
   flex: 1;
   display: flex;
